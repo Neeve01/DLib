@@ -99,10 +99,7 @@ DLib.register('core/sandbox.lua')
 
 if jit then
 	if SERVER then AddCSLuaFile('dlib/core/vmdef.lua') end
-	local vmdef = CompileFile('dlib/core/vmdef.lua')
-	jit.vmdef = nil
-	vmdef('jit_vmdef')
-	jit.vmdef = jit_vmdef
+	jit.vmdef = include('dlib/core/vmdef.lua')
 end
 
 DLib.CMessage = DLib.MessageMaker
