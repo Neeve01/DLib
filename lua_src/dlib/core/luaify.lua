@@ -22,7 +22,7 @@
 -- https://github.com/PAC3-Server/notagain/blob/master/lua/notagain/optimizations/preinit/luaify.lua
 
 local rawequal = rawequal
-local getmetatable = getmetatable
+local getmetatable = debug.getmetatable
 local setmetatable = debug.setmetatable
 local rawget = rawget
 _G.rawtype = _G.rawtype or type
@@ -39,10 +39,6 @@ local function type(var)
 	end
 
 	local meta = getmetatable(var)
-
-	if rawequal(meta, true) or rawequal(meta, false) then
-		return 'table'
-	end
 
 	if rawequal(meta, nil) then
 		return 'table'
