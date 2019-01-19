@@ -33,7 +33,14 @@ table.unpack = unpack
 table.pairs = pairs
 table.ipairs = ipairs
 
--- Appends numeric indexed tables
+--[[
+	@doc
+	@fname table.append
+	@args table destination, table source
+
+	@desc
+	Appends values from source table to destination table. Works only with nurmerical indexed tables
+]]
 function table.append(destination, source)
 	if #source == 0 then return destination end
 
@@ -52,6 +59,14 @@ function table.append(destination, source)
 	return destination
 end
 
+--[[
+	@doc
+	@fname table.prependString
+	@args table destination, string prepend
+
+	@desc
+	Iterates over destination and prepends string to all values (assuming array contains only strings)
+]]
 function table.prependString(destination, prepend)
 	for i, value in ipairs(destination) do
 		destination[i] = prepend .. value
@@ -60,6 +75,14 @@ function table.prependString(destination, prepend)
 	return destination
 end
 
+--[[
+	@doc
+	@fname table.appendString
+	@args table destination, string append
+
+	@desc
+	Iterates over destination and appends string to all values (assuming array contains only strings)
+]]
 function table.appendString(destination, append)
 	for i, value in ipairs(destination) do
 		destination[i] = value .. append
@@ -68,13 +91,22 @@ function table.appendString(destination, append)
 	return destination
 end
 
--- Filters table passed
--- Second argument is a function(key, value, filteringTable)
--- Returns deleted elements
+--[[
+	@doc
+	@fname table.filter
+	@args table target, function filterFunc
+
+	@desc
+	Filters table passed
+	Second argument is a function(key, value, target)
+	@enddesc
+
+	@returns
+	table: deleted elements
+]]
 function table.filter(target, filterFunc)
 	if not filterFunc then error('table.filter - missing filter function') end
 
-	local filtered = {}
 	local toRemove = {}
 
 	for key, value in pairs(target) do
@@ -97,6 +129,19 @@ function table.filter(target, filterFunc)
 	return filtered
 end
 
+--[[
+	@doc
+	@fname table.qfilter
+	@args table target, function filterFunc
+
+	@desc
+	Filters table passed using goto
+	Second argument is a function(key, value, target)
+	@enddesc
+
+	@returns
+	table: deleted elements
+]]
 function table.qfilter(target, filterFunc)
 	if not filterFunc then error('table.qfilter - missing filter function') end
 	if #target == 0 then return {} end
@@ -141,6 +186,19 @@ function table.qfilter(target, filterFunc)
 	return filtered
 end
 
+--[[
+	@doc
+	@fname table.filterNew
+	@args table target, function filterFunc
+
+	@desc
+	Filters table passed
+	Second argument is a function(key, value, target) which should return boolean whenever element pass check
+	@enddesc
+
+	@returns
+	table: passed elements
+]]
 function table.filterNew(target, filterFunc)
 	if not filterFunc then error('table.filterNew - missing filter function') end
 
@@ -156,6 +214,19 @@ function table.filterNew(target, filterFunc)
 	return filtered
 end
 
+--[[
+	@doc
+	@fname table.qfilterNew
+	@args table target, function filterFunc
+
+	@desc
+	Filters table passed using ipairs
+	Second argument is a function(key, value, target) which should return boolean whenever element pass check
+	@enddesc
+
+	@returns
+	table: passed elements
+]]
 function table.qfilterNew(target, filterFunc)
 	if not filterFunc then error('table.qfilterNew - missing filter function') end
 
@@ -171,6 +242,19 @@ function table.qfilterNew(target, filterFunc)
 	return filtered
 end
 
+--[[
+	@doc
+	@fname table.qmerge
+	@args table into, table from
+
+	@desc
+	Filters table passed using ipairs
+	Second argument is a function(key, value, target) which should return boolean whenever element pass check
+	@enddesc
+
+	@returns
+	table: into
+]]
 function table.qmerge(into, inv)
 	for i, val in ipairs(inv) do
 		into[i] = val
@@ -179,6 +263,19 @@ function table.qmerge(into, inv)
 	return into
 end
 
+--[[
+	@doc
+	@fname table.gcopy
+	@args table input
+	@Alias table.qcopy
+
+	@desc
+	Fastly copies a table assuming it is numeric indexed array
+	@enddesc
+
+	@returns
+	table: copied input
+]]
 function table.gcopy(input)
 	if #input == 0 then return {} end
 
@@ -202,6 +299,18 @@ end
 
 table.qcopy = table.gcopy
 
+--[[
+	@doc
+	@fname table.gcopyRange
+	@args table input, number start, number endPos
+
+	@desc
+	Copies array in specified range
+	@enddesc
+
+	@returns
+	table: copied input
+]]
 function table.gcopyRange(input, start, endPos)
 	if #input < start then return {} end
 	endPos = endPos or #input
@@ -227,6 +336,18 @@ function table.gcopyRange(input, start, endPos)
 	return reply
 end
 
+--[[
+	@doc
+	@fname table.unshift
+	@args table input, vararg values
+
+	@desc
+	Inserts values in the start of an array
+	@enddesc
+
+	@returns
+	table: input
+]]
 function table.unshift(tableIn, ...)
 	local values = {...}
 	local count = #values
@@ -252,6 +373,18 @@ function table.unshift(tableIn, ...)
 	return tableIn
 end
 
+--[[
+	@doc
+	@fname table.construct
+	@args table input, function callback, number times, vararg prependArgs
+
+	@desc
+	Calls callback with prependArgs specified times to construct a new array or append values to existing array
+	@enddesc
+
+	@returns
+	table: input or newly created array
+]]
 function table.construct(input, funcToCall, times, ...)
 	input = input or {}
 
@@ -260,6 +393,43 @@ function table.construct(input, funcToCall, times, ...)
 	end
 
 	return input
+end
+
+--[[
+	@doc
+	@fname table.frandom
+	@args table input
+
+	@desc
+	Returns random value from passed array
+	@enddesc
+
+	@returns
+	any: returned value from array
+]]
+function table.frandom(tableIn)
+	return tableIn[math.random(1, #tableIn)]
+end
+
+
+--[[
+	@doc
+	@fname table.qhasValue
+	@args table input, any value
+
+	@desc
+	Checks for value present in specified array quickly using ipairs
+	@enddesc
+
+	@returns
+	boolean: whenever value is present in input
+]]
+function table.qhasValue(findIn, value)
+	for i, val in ipairs(findIn) do
+		if val == value then return true end
+	end
+
+	return false
 end
 
 function table.construct2(funcToCall, times, ...)
@@ -272,18 +442,18 @@ function table.construct2(funcToCall, times, ...)
 	return output
 end
 
-function table.frandom(tableIn)
-	return tableIn[math.random(1, #tableIn)]
-end
+--[[
+	@doc
+	@fname table.flipIntoHash
+	@args table input
 
-function table.qhasValue(findIn, value)
-	for i, val in ipairs(findIn) do
-		if val == value then return true end
-	end
+	@desc
+	Iterates array over and creates new table {[value] = index}
+	@enddesc
 
-	return false
-end
-
+	@returns
+	table: flipped hash table
+]]
 function table.flipIntoHash(tableIn)
 	local output = {}
 
@@ -294,6 +464,18 @@ function table.flipIntoHash(tableIn)
 	return output
 end
 
+--[[
+	@doc
+	@fname table.flip
+	@args table input
+
+	@desc
+	Returns new flipped array
+	@enddesc
+
+	@returns
+	table: flipped array
+]]
 function table.flip(tableIn)
 	local values = {}
 
@@ -304,6 +486,18 @@ function table.flip(tableIn)
 	return values
 end
 
+--[[
+	@doc
+	@fname table.sortedFind
+	@args table findIn, table findWhat, any ifNone
+
+	@desc
+	Gets hash table (flipIntoHash) of passed table and attempts to search for ANY value specified in findWhat
+	@enddesc
+
+	@returns
+	any: found value
+]]
 function table.sortedFind(findIn, findWhat, ifNone)
 	local hash = table.flipIntoHash(findIN)
 
@@ -316,6 +510,19 @@ function table.sortedFind(findIn, findWhat, ifNone)
 	return ifNone
 end
 
+--[[
+	@doc
+	@fname table.removeValues
+	@args table findIn, vargarg values
+
+	@desc
+	Removes values at specified indexes. **INDEX LIST MUST BE SORTED!** (from the smallest index to biggest).
+	Can also accept array of values as second argument.
+	@enddesc
+
+	@returns
+	table: removed values
+]]
 function table.removeValues(tableIn, ...)
 	local first = select(1, ...)
 	local args
@@ -336,13 +543,26 @@ function table.removeValues(tableIn, ...)
 	return removed
 end
 
+--[[
+	@doc
+	@fname table.removeByMember
+	@args table findIn, any memberID, any memberValue
+
+	@desc
+	Iterates over array and looks for tables with memberID index present and removes it when it is equal to memberValue
+	@enddesc
+
+	@returns
+	any: removed value. *nil if value is not found*
+]]
 function table.removeByMember(tableIn, memberID, memberValue)
-	local removed = {}
+	local removed
 
 	for i = 1, #tableIn do
 		local v = tableIn[i]
 		if type(v) == 'table' and v[memberID] == memberValue then
 			table.remove(tableIn, i)
+			removed = v
 			break
 		end
 	end
@@ -350,6 +570,19 @@ function table.removeByMember(tableIn, memberID, memberValue)
 	return removed
 end
 
+--[[
+	@doc
+	@fname table.deduplicate
+	@args table tableIn
+
+	@desc
+	Iterates over array and removed duplicated values
+	@enddesc
+
+	@returns
+	table: passed table
+	table: array contain removed values
+]]
 function table.deduplicate(tableIn)
 	local values = {}
 	local toremove = {}

@@ -50,6 +50,15 @@ local function findRecursiveVisible(dirTarget)
 	table.append(dirs, findDirs)
 end
 
+--[[
+	@doc
+	@fname file.FindVisible
+	@args string dirIn, string datapatchIn = 'LUA'
+
+	@returns
+	table: found files (bare path)
+	table: found dirs (bare path)
+]]
 function file.FindVisible(dir, searchIn)
 	local fileFind, dirFind = file.Find(dir .. '/*', searchIn or 'LUA')
 	table.filter(fileFind, function(key, val) return val:sub(1, 1) ~= '.' end)
@@ -57,6 +66,15 @@ function file.FindVisible(dir, searchIn)
 	return fileFind, dirFind
 end
 
+--[[
+	@doc
+	@fname file.FindVisiblePrepend
+	@args string dirIn, string datapatchIn = 'LUA'
+
+	@returns
+	table: found files (full paths)
+	table: found dirs (full paths)
+]]
 function file.FindVisiblePrepend(dir, searchIn)
 	local fileFind, dirFind = file.FindVisible(dir, searchIn)
 	table.prependString(fileFind, dir .. '/')
@@ -64,6 +82,15 @@ function file.FindVisiblePrepend(dir, searchIn)
 	return fileFind, dirFind
 end
 
+--[[
+	@doc
+	@fname file.FindRecursive
+	@args string dirIn, string endfixTo = '/*', string datapatchIn = 'LUA'
+
+	@returns
+	table: found files (full paths)
+	table: found dirs (full paths)
+]]
 function file.FindRecursive(dir, endfixTo, searchIn2)
 	endfixTo = endfixTo or '/*'
 	searchIn2 = searchIn2 or 'LUA'
@@ -78,6 +105,15 @@ function file.FindRecursive(dir, endfixTo, searchIn2)
 	return files, dirs
 end
 
+--[[
+	@doc
+	@fname file.FindRecursiveVisible
+	@args string dirIn, string datapatchIn = 'LUA'
+
+	@returns
+	table: found files (full paths)
+	table: found dirs (full paths)
+]]
 function file.FindRecursiveVisible(dir, searchIn2)
 	searchIn2 = searchIn2 or 'LUA'
 	searchIn = searchIn2

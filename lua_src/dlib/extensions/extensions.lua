@@ -68,38 +68,136 @@ function PhysObj:EnableCollisions(newStatus)
 	return self:DLibEnableCollisions(newStatus)
 end
 
+--[[
+	@doc
+	@fname Vector:Copy
+
+	@desc
+	Same as doing `Vector(self)`
+	@enddesc
+
+	@returns
+	Vector
+]]
 function vectorMeta:Copy()
 	return Vector(self)
 end
 
+--[[
+	@doc
+	@fname Vector:__call
+
+	@returns
+	Vector: copy
+]]
 function vectorMeta:__call()
 	return Vector(self)
 end
 
+--[[
+	@doc
+	@fname Vector:ToNative
+
+	@returns
+	Vector: self
+]]
 function vectorMeta:ToNative()
 	return self
 end
 
+--[[
+	@doc
+	@fname Vector:IsNormalized
+
+	@returns
+	boolean
+]]
 function vectorMeta:IsNormalized()
 	return self.x <= 1 and self.y <= 1 and self.z <= 1 and self.x >= -1 and self.y >= -1 and self.z >= -1
 end
 
+--[[
+	@doc
+	@fname Vector:Receive
+	@args Vector from
+
+	@returns
+	Vector: self
+]]
 function vectorMeta:Receive(target)
 	local x, y, z = target.x, target.y, target.z
 	self.x, self.y, self.z = x, y, z
 	return self
 end
 
+--[[
+	@doc
+	@fname Vector:RotateAroundAxis
+	@args Vector axis, number rotation
+
+	@returns
+	Vector: self
+]]
 function vectorMeta:RotateAroundAxis(axis, rotation)
 	local ang = self:Angle()
 	ang:RotateAroundAxis(axis, rotation)
 	return self:Receive(ang:Forward() * self:Length())
 end
 
+--[[
+	@doc
+	@fname Vector:ToColor
+
+	@returns
+	Color
+]]
 function vectorMeta:ToColor()
 	return Color(self.x * 255, self.y * 255, self.z * 255)
 end
 
+local type = luatype
+
+--[[
+	@doc
+	@fname Vector:WithinAABox
+	@args Vector mins, Vector maxs
+
+	@desc
+	can also accept `LVector`
+	@enddesc
+
+	@returns
+	boolean
+]]
+function vectorMeta:WithinAABox(mins, maxs)
+	if type(mins) ~= 'Vector' and type(mins) ~= 'LVector' then
+		error('Vector:WithinAABox(' .. type(mins) .. ', ' .. type(maxs) .. ') - invalid call')
+	end
+
+	if type(maxs) ~= 'Vector' and type(maxs) ~= 'LVector' then
+		error('Vector:WithinAABox(' .. type(mins) .. ', ' .. type(maxs) .. ') - invalid call')
+	end
+
+	return self.x >= mins.x
+		and self.y >= mins.y
+		and self.z >= mins.z
+		and self.x <= maxs.x
+		and self.y <= maxs.y
+		and self.z <= maxs.z
+end
+
+--[[
+	@doc
+	@fname sql.EQuery
+	@args string query
+
+	@desc
+	Same as gmod's sql.Query except it prints errors in console when one occures
+	@enddesc
+
+	@returns
+	any: returned value from database
+]]
 function sql.EQuery(...)
 	local data = sql.Query(...)
 
@@ -111,6 +209,14 @@ function sql.EQuery(...)
 	return data
 end
 
+--[[
+	@doc
+	@fname math.progression
+	@args number self, number min, number max, number middle = nil
+
+	@returns
+	number: position of self between min and max in 0-1 range, or 0-1-0 is middle is not nil
+]]
 function math.progression(self, min, max, middle)
 	if self < min then return 0 end
 
@@ -129,6 +235,14 @@ function math.progression(self, min, max, middle)
 	return math.min((self - min) / (max - min), 1)
 end
 
+--[[
+	@doc
+	@fname math.equal
+	@args vararg numbers
+
+	@returns
+	boolean
+]]
 function math.equal(...)
 	local amount = select('#', ...)
 	assert(amount > 1, 'At least two numbers are required!')
@@ -143,6 +257,14 @@ function math.equal(...)
 	return true
 end
 
+--[[
+	@doc
+	@fname math.average
+	@args vararg numbers
+
+	@returns
+	number: the average
+]]
 function math.average(...)
 	local amount = select('#', ...)
 	assert(amount > 1, 'At least two numbers are required!')
@@ -159,10 +281,26 @@ local type = type
 local table = table
 local unpack = unpack
 
+--[[
+	@doc
+	@fname math.bezier
+	@args number t, vararg numbers
+
+	@returns
+	number
+]]
 function math.bezier(t, ...)
 	return math.tbezier(t, {...})
 end
 
+--[[
+	@doc
+	@fname math.tbezier
+	@args number t, table numbers
+
+	@returns
+	number
+]]
 -- accepts table
 function math.tbezier(t, values)
 	assert(type(t) == 'number', 'invalid T variable')
@@ -196,6 +334,14 @@ function math.tbezier(t, values)
 	return math.tbezier(t, points)
 end
 
+--[[
+	@doc
+	@fname math.tformat
+	@args number time
+
+	@returns
+	table: formatted table
+]]
 function math.tformat(time)
 	assert(type(time) == 'number', 'Invalid time provided.')
 
@@ -233,6 +379,19 @@ function math.tformat(time)
 	return output
 end
 
+
+--[[
+	@doc
+	@fname math.untformat
+	@args table time
+
+	@desc
+	reverse of table format of number
+	@enddesc
+
+	@returns
+	number
+]]
 function math.untformat(time)
 	assert(type(time) == 'table', 'Invalid time provided. You must provide table in math.tformat output format.')
 	assert(type(time.centuries) == 'number', 'Invalid time provided. You must provide table in math.tformat output format.')
@@ -264,6 +423,16 @@ end
 
 local plyMeta = FindMetaTable('Player')
 
+--[[
+	@doc
+	@fname Player:LimitHit
+
+	@desc
+	This function no longer produce limit hit message when called clientside
+	this function is internal and is used by gmod itself
+	but the override allows you to put !g:Player:CheckLimit in shared code of toolguns
+	@enddesc
+]]
 function plyMeta:LimitHit(limit)
 	-- we call CheckLimit() on client just for prediction
 	-- so when we actually hit limit - it can produce two messages because client will also try to
@@ -318,6 +487,19 @@ if CLIENT then
 		end
 	end
 
+	--[[
+		@doc
+		@fname ScreenSize
+		@args number modify
+
+		@desc
+		same as ScreenScale but use screen height (by default)
+		behvaior can be changed by user
+		@enddesc
+
+		@returns
+		number
+	]]
 	function _G.ScreenSize(modify)
 		return screenfunc(modify)
 	end
