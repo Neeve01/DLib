@@ -36,16 +36,24 @@ class GLuaFunction extends GLuaEntryBase {
 		}
 	}
 
+	generateFullLink() {
+		let levels = ''
+
+		if (this.library) {
+			levels = this.library.buildLevels(2)
+		}
+
+		return `${levels}[${this.name}](./functions/${this.name})`
+	}
+
 	generatePage() {
 		let levels = ''
 
 		if (this.library) {
-			levels = this.library.buildLevels()
+			levels = this.library.buildLevels(2)
 		}
 
-		return `# DLib documentation
-
-## ${levels}${this.name}
+		return `## ${levels}${this.name}
 
 ### Usage:
 
@@ -59,6 +67,7 @@ ${this.generateDescription(this.library && this.library.pathToRoot() || '../')}
 
 ${this.generateDeprecated()}
 ${this.generateInternal()}
+${this.generateReplaces()}
 
 ---------------------
 
@@ -74,7 +83,7 @@ ${this.generateWarnings()}
 
 ${this.generateDisclaimers()}
 
-### [Go to upper level](../index.md)`
+### [Go to upper level](${this.getUpLink()})`
 	}
 }
 

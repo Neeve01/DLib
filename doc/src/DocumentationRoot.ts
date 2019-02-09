@@ -30,7 +30,8 @@ interface IGLuaList {
 	getDocLevel(): number
 	pathToRoot(): string
 	generateFiles(outputDir: string): void
-	buildLevels(): string
+	buildLevels(level?: number): string
+	getUpLink(): string
 	root: DocumentationRoot
 }
 
@@ -64,7 +65,7 @@ class DocumentationRoot {
 			return description
 		}
 
-		return description.replace(/\!(g|p|c|s):(\S+)/, (substr, arg1, arg2) => {
+		return description.replace(/\!(g|p|c|s):(\S+)/g, (substr, arg1, arg2) => {
 			switch (arg1) {
 				case 'g':
 					return `[${arg2}](http://wiki.garrysmod.com/page/${arg2.replace(/\.|:/g, '/')})`
@@ -81,7 +82,6 @@ class DocumentationRoot {
 	}
 
 	generateFiles(outputDir: string) {
-		const index = this.generateIndex()
 		mkdir(outputDir)
 		mkdir(outputDir + '/sub')
 		mkdir(outputDir + '/classes')
@@ -89,7 +89,9 @@ class DocumentationRoot {
 		mkdir(outputDir + '/hooks')
 		mkdir(outputDir + '/panels')
 
-		fs.writeFileSync(outputDir + '/index.md', index, {encoding: 'utf8'})
+		fs.writeFileSync(outputDir + '/home.md', this.generateIndex(), {encoding: 'utf8'})
+		fs.writeFileSync(outputDir + '/functions.md', this.generateFunctionsIndex(), {encoding: 'utf8'})
+		fs.writeFileSync(outputDir + '/replaces.md', this.generateReplacementsIndex(), {encoding: 'utf8'})
 
 		for (const [name, library] of this.libraries) {
 			library.generateFiles(outputDir + '/sub/' + name)
@@ -114,36 +116,92 @@ class DocumentationRoot {
 		}
 	}
 
+	generateFunctionsIndex() {
+		const output = []
+
+		for (const [name, globalvar] of this.globals) {
+			if (globalvar instanceof GLuaFunction) {
+				output.push(`* [${globalvar.name}](./functions/${name})(${globalvar.args.buildMarkdown()})`)
+			}
+		}
+
+		for (const lib of this.libraries.values()) {
+			output.push(...lib.generateFunctionListRecursive(undefined, `${lib.name}.`))
+		}
+
+		for (const eclass of this.classes.values()) {
+			output.push(...eclass.generateFunctionList(`./classes/`, `${eclass.name}:`))
+		}
+
+		output.sort()
+
+		return `# Full function list
+${output.join('  \n')}
+`
+	}
+
+	generateReplacementsIndex() {
+		const output = []
+
+		for (const [name, globalvar] of this.globals) {
+			if (globalvar instanceof GLuaFunction && globalvar.replacesDefault) {
+				output.push(`* ${globalvar.generateFullLink()}(${globalvar.args.buildMarkdown()})`)
+			}
+		}
+
+		for (const lib of this.libraries.values()) {
+			output.push(...lib.generateReplacesFunctionListRecursive(undefined, `${lib.name}.`))
+		}
+
+		output.sort()
+
+		return `# Full list of functions which replace default ones
+**This list does not include any implicit replacements caused by these replacements.**
+
+${output.join('  \n')}
+`
+	}
+
 	generateIndex() {
 		const libs = []
 		const classes = []
 		const globals = []
+		const panels = []
 
 		for (const [name, library] of this.libraries) {
-			libs.push(`* [${library.name}](./sub/${name}/index.md)`)
+			libs.push(`* [${library.name}](./sub/${name})`)
 		}
 
 		for (const [name, classext] of this.classes) {
-			classes.push(`* [${classext.name}](./classes/${name}/index.md)`)
+			classes.push(`* [${classext.name}](./classes/${name})`)
+		}
+
+		for (const [name, panel] of this.panels) {
+			panels.push(`* [${panel.name}](./panels/${name})`)
 		}
 
 		for (const [name, globalvar] of this.globals) {
 			if (globalvar instanceof GLuaFunction) {
-				globals.push(`* Function: [${globalvar.name}](./functions/${name}.md)(${globalvar.args.buildMarkdown()})`)
+				globals.push(`* Function: [${globalvar.name}](./functions/${name})(${globalvar.args.buildMarkdown()})`)
 			}
 		}
 
-		return `# DLib documentation
-This small documentation fastly describes features (lol no, just points) of DLib library for GMod.
+		return `This small documentation fastly describes features (lol no, just points) of DLib library for GMod.
 
 You can find many things outta here.
 ----------------------------
+[List of every function present inside libraries](./functions)
+
+[List of functions which replace vanilla ones](./replaces)
 ## Libraries
 ${libs.join('  \n')}
 ## Class extensions
 ${classes.join('  \n')}
 ## Global Functions
-${globals.join('  \n')}`
+${globals.join('  \n')}
+## Panels
+${panels.join('  \n')}
+`
 	}
 
 	getLibrary(name: string) {

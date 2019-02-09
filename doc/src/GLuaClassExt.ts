@@ -28,8 +28,12 @@ class GLuaClassExtension implements IGLuaList {
 
 	}
 
+	getUpLink() {
+		return `../home`
+	}
+
 	buildLevels(level = 1): string {
-		return `[${this.id}](../index.md):`
+		return `[${this.id}](../../${this.id}):`
 	}
 
 	getDocLevel(): number {
@@ -46,7 +50,7 @@ class GLuaClassExtension implements IGLuaList {
 		mkdir(outputDir + '/functions')
 		mkdir(outputDir + '/variables')
 
-		fs.writeFileSync(outputDir + '/index.md', index, {encoding: 'utf8'})
+		fs.writeFileSync(outputDir + '.md', index, {encoding: 'utf8'})
 
 		for (const [name, entry] of this.entries) {
 			if (entry instanceof GLuaFunction) {
@@ -55,12 +59,12 @@ class GLuaClassExtension implements IGLuaList {
 		}
 	}
 
-	generateFunctionList(prefix = '') {
+	generateFunctionList(prefix = '', namePrefix = '') {
 		const output = []
 
 		for (const [name, entry] of this.entries) {
 			if (entry instanceof GLuaFunction) {
-				output.push(`* [${entry.name}](${prefix}./functions/${name}.md)(${entry.args.buildMarkdown()})`)
+				output.push(`* [${namePrefix}${entry.name}](${prefix}./${this.id}/functions/${name})(${entry.args.buildMarkdown()})`)
 			}
 		}
 
@@ -75,12 +79,11 @@ class GLuaClassExtension implements IGLuaList {
 		let prettyName = this.name
 
 		if (this.root.panels.has(this.id)) {
-			prettyName = `Panel: [${this.name}](../../panels/${this.id}.md)`
+			prettyName = `Panel: [${this.name}](../../panels/${this.id})`
 		}
 
-		return `# DLib documentation
-## ${prettyName}
-[Go up](../index.md)
+		return `## ${prettyName}
+[Go up](../home)
 ### Methods
 ${funcs.join('  \n')}`
 	}
