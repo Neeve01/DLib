@@ -231,8 +231,13 @@ function meta:ShouldDisplayAmmo()
 		return cache.Draw and (cache.PrimaryAmmo ~= nil or cache.PrimaryClip ~= nil)
 	end
 
-	return self:HasWeapon() and self:GetWeapon().DrawAmmo ~= false and (self:GetVarClipMax1() > 0 or self:GetVarClipMax2() > 0 or self:GetVarAmmoType1() ~= -1 or self:GetVarAmmoType2() ~= -1)
+	return self:HasWeapon()
+		and self:GetWeapon().DrawAmmo ~= false
+		and (self:GetVarClipMax1() > 0 or
+			self:GetVarAmmoType1() ~= -1)
 end
+
+meta.ShouldDisplayAmmo1 = meta.ShouldDisplayAmmo
 
 --[[
 	@doc
@@ -265,12 +270,18 @@ function meta:ShouldDisplaySecondaryAmmo()
 		return cache.Draw and cache.SecondaryAmmo ~= nil
 	end
 
-	return self:HasWeapon() and self:GetWeapon().DrawAmmo ~= false and (self:GetVarClipMax2() > 0 or self:GetVarClip2() > 0 or self:GetVarAmmoType2() ~= -1)
+	return self:HasWeapon()
+		and self:GetWeapon().DrawAmmo ~= false
+		and (self:GetVarClipMax2() > 0 or
+			self:GetVarClip2() > 0 or
+			self:GetVarAmmoType2() ~= -1)
 end
+
+meta.ShouldDisplayAmmo2 = meta.ShouldDisplaySecondaryAmmo
 
 --[[
 	@doc
-	@fname HUDCommonsBase:ShouldDisplayAmmo2
+	@fname HUDCommonsBase:ShouldDisplayAmmo_Select
 
 	@client
 
@@ -291,7 +302,7 @@ end
 	@returns
 	boolean
 ]]
-function meta:ShouldDisplayAmmo2()
+function meta:ShouldDisplayAmmo_Select()
 	if self:GetVarWeaponClass_Select() == 'weapon_slam' then
 		return true
 	end
@@ -305,9 +316,11 @@ function meta:ShouldDisplayAmmo2()
 	return self:HasPredictedWeapon() and self:PredictSelectWeapon().DrawAmmo ~= false and (self:GetVarClipMax1_Select() > 0 or self:GetVarClipMax2_Select() > 0 or self:GetVarAmmoType1_Select() ~= -1 or self:GetVarAmmoType2_Select() ~= -1)
 end
 
+meta.ShouldDisplayAmmo1_Select = meta.ShouldDisplayAmmo_Select
+
 --[[
 	@doc
-	@fname HUDCommonsBase:ShouldDisplaySecondaryAmmo2
+	@fname HUDCommonsBase:ShouldDisplaySecondaryAmmo_Select
 
 	@client
 
@@ -327,7 +340,7 @@ end
 	@returns
 	boolean
 ]]
-function meta:ShouldDisplaySecondaryAmmo2()
+function meta:ShouldDisplaySecondaryAmmo_Select()
 	if self:GetVarWeaponClass_Select() == 'weapon_slam' then
 		return false
 	end
@@ -340,6 +353,8 @@ function meta:ShouldDisplaySecondaryAmmo2()
 
 	return self:HasPredictedWeapon() and self:PredictSelectWeapon().DrawAmmo ~= false and (self:GetVarClipMax2_Select() > 0 or self:GetVarClip2_Select() > 0 or self:GetVarAmmoType2_Select() ~= -1)
 end
+
+meta.ShouldDisplayAmmo2_Select = meta.ShouldDisplaySecondaryAmmo_Select
 
 --[[
 	@doc
@@ -370,7 +385,7 @@ end
 
 --[[
 	@doc
-	@fname HUDCommonsBase:SelectSecondaryAmmoReady2
+	@fname HUDCommonsBase:SelectSecondaryAmmoReady_Select
 
 	@client
 
@@ -381,7 +396,7 @@ end
 	@returns
 	number
 ]]
-function meta:SelectSecondaryAmmoReady2()
+function meta:SelectSecondaryAmmoReady_Select()
 	if self:GetVarWeaponClass_Select() == 'weapon_slam' then
 		return -1
 	end
@@ -428,7 +443,7 @@ end
 
 --[[
 	@doc
-	@fname HUDCommonsBase:SelectSecondaryAmmoStored2
+	@fname HUDCommonsBase:SelectSecondaryAmmoStored_Select
 
 	@client
 
@@ -439,7 +454,7 @@ end
 	@returns
 	number
 ]]
-function meta:SelectSecondaryAmmoStored2()
+function meta:SelectSecondaryAmmoStored_Select()
 	if self:GetVarWeaponClass_Select() == 'weapon_slam' then
 		return -1
 	end
@@ -577,14 +592,57 @@ function meta:ShouldDisplayAmmoStored()
 	end
 
 	return self:HasWeapon() and
-		(self:GetVarClipMax1() > 0 or self:GetVarClipMax2() > 0) and
-		(self:GetVarAmmo1() >= 0 or self:GetVarAmmo2() >= 0) and
-		(self:IsValidAmmoType1() or self:IsValidAmmoType2())
+		self:GetVarClipMax1() > 0 and
+		self:GetVarAmmo1() >= 0 and
+		self:IsValidAmmoType1()
 end
+
+meta.ShouldDisplayAmmo1Stored = meta.ShouldDisplayAmmoStored
+meta.ShouldDisplayAmmoStored1 = meta.ShouldDisplayAmmoStored
 
 --[[
 	@doc
-	@fname HUDCommonsBase:ShouldDisplayAmmoStored2
+	@fname HUDCommonsBase:ShouldDisplaySecondaryAmmoStored
+
+	@client
+
+	@desc
+	Three functions exist: `ShouldDisplayAmmo`, `ShouldDisplayAmmoReady` and `ShouldDisplayAmmoStored`, along with their X2 and `Secondary` counterparts.
+	To understand how these work, there would be a table which describes what should you do in each ase
+	Depending on your HUD logic you can get next cases (assuming they go as `ShouldDisplayAmmo`, `ShouldDisplayAmmoReady`, `ShouldDisplayAmmoStored`):
+	`false`, N/A, N/A - Don't show anything
+	`true`, `false`, `false` - Use and show directly GetDisplayAmmo
+	`true`, `true`, `false` - Weapon got a clip, but got no reserve ammo. This is a very rare case (and a bit odd to be used by SWEP makers)
+	`true`, `false`, `true` - Odd case/Doesn't make sense, handle as you wish. Maybe handle as `true`, `false`, `false`
+	`true`, `true`, `true` - Display everything
+	@enddesc
+
+	@returns
+	boolean
+]]
+function meta:ShouldDisplaySecondaryAmmoStored()
+	if self:GetVarWeaponClass() == 'weapon_slam' then
+		return false
+	end
+
+	local cache = self:GetVarCustomAmmoDisplayCache()
+
+	if cache then
+		return cache.Draw and cache.SecondaryAmmo ~= nil
+	end
+
+	return self:HasWeapon() and
+		(self:GetVarClipMax2() > 0 or
+		self:GetVarAmmo2() >= 0 or
+		self:IsValidAmmoType2())
+end
+
+meta.ShouldDisplayAmmo2Stored = meta.ShouldDisplaySecondaryAmmoStored
+meta.ShouldDisplayAmmoStored2 = meta.ShouldDisplaySecondaryAmmoStored
+
+--[[
+	@doc
+	@fname HUDCommonsBase:ShouldDisplayAmmoStored_Select
 
 	@client
 
@@ -604,7 +662,7 @@ end
 	@returns
 	boolean
 ]]
-function meta:ShouldDisplayAmmoStored2()
+function meta:ShouldDisplayAmmoStored_Select()
 	if self:GetVarWeaponClass_Select() == 'weapon_slam' then
 		return false
 	end
@@ -616,10 +674,55 @@ function meta:ShouldDisplayAmmoStored2()
 	end
 
 	return self:HasPredictedWeapon() and
-		(self:GetVarClipMax1_Select() > 0 or self:GetVarClipMax2_Select() > 0) and
-		(self:GetVarAmmo1_Select() >= 0 or self:GetVarAmmo2_Select() >= 0) and
-		(self:IsValidAmmoType1_Select() or self:IsValidAmmoType2_Select())
+		self:GetVarClipMax1_Select() > 0 and
+		self:GetVarAmmo1_Select() >= 0 and
+		self:IsValidAmmoType1_Select()
 end
+
+meta.ShouldDisplayAmmo1Stored_Select = meta.ShouldDisplayAmmoStored_Select
+meta.ShouldDisplayAmmoStored1_Select = meta.ShouldDisplayAmmoStored_Select
+
+--[[
+	@doc
+	@fname HUDCommonsBase:ShouldDisplaySecondaryAmmoStored_Select
+
+	@client
+
+	@desc
+	Based on `self:PredictSelectWeapon()` instead of `self:GetWeapon()`
+
+	Three functions exist: `ShouldDisplayAmmo`, `ShouldDisplayAmmoReady` and `ShouldDisplayAmmoStored`, along with their X2 and `Secondary` counterparts.
+	To understand how these work, there would be a table which describes what should you do in each ase
+	Depending on your HUD logic you can get next cases (assuming they go as `ShouldDisplayAmmo`, `ShouldDisplayAmmoReady`, `ShouldDisplayAmmoStored`):
+	`false`, N/A, N/A - Don't show anything
+	`true`, `false`, `false` - Use and show directly GetDisplayAmmo
+	`true`, `true`, `false` - Weapon got a clip, but got no reserve ammo. This is a very rare case (and a bit odd to be used by SWEP makers)
+	`true`, `false`, `true` - Odd case/Doesn't make sense, handle as you wish. Maybe handle as `true`, `false`, `false`
+	`true`, `true`, `true` - Display everything
+	@enddesc
+
+	@returns
+	boolean
+]]
+function meta:ShouldDisplaySecondaryAmmoStored_Select()
+	if self:GetVarWeaponClass_Select() == 'weapon_slam' then
+		return false
+	end
+
+	local cache = self:GetVarCustomAmmoDisplayCache_Select()
+
+	if cache then
+		return cache.Draw and cache.PrimaryAmmo ~= nil
+	end
+
+	return self:HasPredictedWeapon() and
+		self:GetVarClipMax2_Select() > 0 and
+		self:GetVarAmmo2_Select() >= 0 and
+		self:IsValidAmmoType2_Select()
+end
+
+meta.ShouldDisplayAmmo2Stored_Select = meta.ShouldDisplaySecondaryAmmoStored_Select
+meta.ShouldDisplayAmmoStored2_Select = meta.ShouldDisplaySecondaryAmmoStored_Select
 
 --[[
 	@doc
@@ -773,15 +876,49 @@ function meta:ShouldDisplayAmmoReady()
 	local cache = self:GetVarCustomAmmoDisplayCache()
 
 	if cache then
-		return cache.Draw and (cache.PrimaryAmmo ~= nil or cache.PrimaryClip ~= nil or cache.SecondaryAmmo ~= nil)
+		return cache.Draw and cache.PrimaryAmmo ~= nil or cache.PrimaryClip ~= nil
 	end
 
-	return self:HasWeapon() and (self:GetVarClipMax1() > 0 or self:GetVarClipMax2() > 0)
+	return self:HasWeapon() and self:GetVarClipMax1() > 0
 end
 
 --[[
 	@doc
-	@fname HUDCommonsBase:ShouldDisplayAmmoReady2
+	@fname HUDCommonsBase:ShouldDisplaySecondaryAmmoReady
+
+	@client
+
+	@desc
+	Three functions exist: `ShouldDisplayAmmo`, `ShouldDisplayAmmoReady` and `ShouldDisplayAmmoStored`, along with their X2 and `Secondary` counterparts.
+	To understand how these work, there would be a table which describes what should you do in each ase
+	Depending on your HUD logic you can get next cases (assuming they go as `ShouldDisplayAmmo`, `ShouldDisplayAmmoReady`, `ShouldDisplayAmmoStored`):
+	`false`, N/A, N/A - Don't show anything
+	`true`, `false`, `false` - Use and show directly GetDisplayAmmo
+	`true`, `true`, `false` - Weapon got a clip, but got no reserve ammo. This is a very rare case (and a bit odd to be used by SWEP makers)
+	`true`, `false`, `true` - Odd case/Doesn't make sense, handle as you wish. Maybe handle as `true`, `false`, `false`
+	`true`, `true`, `true` - Display everything
+	@enddesc
+
+	@returns
+	boolean
+]]
+function meta:ShouldDisplaySecondaryAmmoReady()
+	if self:GetVarWeaponClass() == 'weapon_slam' then
+		return false
+	end
+
+	local cache = self:GetVarCustomAmmoDisplayCache()
+
+	if cache then
+		return false
+	end
+
+	return self:HasWeapon() and self:GetVarClipMax2() > 0
+end
+
+--[[
+	@doc
+	@fname HUDCommonsBase:ShouldDisplayAmmoReady_Select
 
 	@client
 
@@ -802,7 +939,7 @@ end
 	@returns
 	boolean
 ]]
-function meta:ShouldDisplayAmmoReady2()
+function meta:ShouldDisplayAmmoReady_Select()
 	if self:GetVarWeaponClass_Select() == 'weapon_slam' then
 		return false
 	end
@@ -814,6 +951,43 @@ function meta:ShouldDisplayAmmoReady2()
 	end
 
 	return self:HasPredictedWeapon() and (self:GetVarClipMax1_Select() > 0 or self:GetVarClipMax2_Select() > 0)
+end
+
+--[[
+	@doc
+	@fname HUDCommonsBase:ShouldDisplaySecondaryAmmoReady_Select
+
+	@client
+
+	@desc
+	Based on `self:PredictSelectWeapon()` instead of `self:GetWeapon()`
+
+	Three functions exist: `ShouldDisplayAmmo`, `ShouldDisplayAmmoReady` and `ShouldDisplayAmmoStored`, along with their X2 and `Secondary` counterparts.
+	To understand how these work, there would be a table which describes what should you do in each ase
+	Depending on your HUD logic you can get next cases (assuming they go as `ShouldDisplayAmmo`, `ShouldDisplayAmmoReady`, `ShouldDisplayAmmoStored`):
+	`false`, N/A, N/A - Don't show anything
+	`true`, `false`, `false` - Use and show directly GetDisplayAmmo
+	`true`, `true`, `false` - Weapon got a clip, but got no reserve ammo. This is a very rare case (and a bit odd to be used by SWEP makers)
+	`true`, `false`, `true` - Odd case/Doesn't make sense, handle as you wish. Maybe handle as `true`, `false`, `false`
+	`true`, `true`, `true` - Display everything
+
+	@enddesc
+
+	@returns
+	boolean
+]]
+function meta:ShouldDisplaySecondaryAmmoReady_Select()
+	if self:GetVarWeaponClass_Select() == 'weapon_slam' then
+		return false
+	end
+
+	local cache = self:GetVarCustomAmmoDisplayCache_Select()
+
+	if cache then
+		return false
+	end
+
+	return self:HasPredictedWeapon() and self:GetVarClipMax2_Select() > 0
 end
 
 --[[
@@ -1151,6 +1325,7 @@ end
 ]]
 function meta:GetAmmoFillage1()
 	if not self:ShouldDisplayAmmo() then return 1 end
+	if not self:ShouldDisplayAmmoReady() then return self:GetDisplayAmmo1() ~= 0 and 1 or 0 end
 	if self:GetDisplayMaxClip1() <= 0 then return 1 end
 	if self:GetDisplayClip1() <= 0 then return 0 end
 	if self:GetDisplayMaxClip1() <= self:GetDisplayClip1() then return 1 end
@@ -1167,6 +1342,7 @@ end
 ]]
 function meta:GetAmmoFillage2()
 	if not self:ShouldDisplaySecondaryAmmo() then return 1 end
+	if not self:ShouldDisplaySecondaryAmmoReady() then return self:GetDisplayAmmo2() ~= 0 and 1 or 0 end
 	if self:GetDisplayMaxClip2() <= 0 then return 1 end
 	if self:GetDisplayClip2() <= 0 then return 0 end
 	if self:GetDisplayMaxClip2() <= self:GetDisplayClip2() then return 1 end
@@ -1202,7 +1378,8 @@ end
 	number: between 0 and 1 inclusive
 ]]
 function meta:GetAmmoFillage1_Select()
-	if not self:ShouldDisplayAmmo2() then return 1 end
+	if not self:ShouldDisplayAmmo_Select() then return 1 end
+	if not self:ShouldDisplayAmmoReady_Select() then return self:GetDisplayAmmo1_Select() ~= 0 and 1 or 0 end
 	if self:GetVarClipMax1_Select() <= 0 then return 1 end
 	if self:GetVarClip1_Select() <= 0 then return 0 end
 	if self:GetVarClipMax1_Select() <= self:GetVarClip1_Select() then return 1 end
@@ -1223,7 +1400,8 @@ end
 	number: between 0 and 1 inclusive
 ]]
 function meta:GetAmmoFillage2_Select()
-	if not self:ShouldDisplaySecondaryAmmo2() then return 1 end
+	if not self:ShouldDisplaySecondaryAmmo_Select() then return 1 end
+	if not self:ShouldDisplaySecondaryAmmoReady_Select() then return self:GetDisplayAmmo2_Select() ~= 0 and 1 or 0 end
 	if self:GetVarClipMax2_Select() <= 0 then return 1 end
 	if self:GetVarClip2_Select() <= 0 then return 0 end
 	if self:GetVarClipMax2_Select() <= self:GetVarClip2_Select() then return 1 end
