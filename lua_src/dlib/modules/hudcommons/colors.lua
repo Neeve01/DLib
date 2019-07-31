@@ -221,10 +221,10 @@ end
 	Color: this color is being updated by the base internally, so you don't have to call function. You *are* allowed to edit alpha channel of this color.
 ]]
 function HUDCommons.CreateColorN2(class, ...)
-	local colorProxy = Color()
+	local colorProxy = Color(0, 0, 0)
 	local color = HUDCommons.CreateColorN(class, ...)
 	HUDCommons.ColorsVarsN_Proxies[class] = colorProxy
-	color = color()
+	color = color(0, 0, 0)
 	colorProxy.r = color.r
 	colorProxy.g = color.g
 	colorProxy.b = color.b

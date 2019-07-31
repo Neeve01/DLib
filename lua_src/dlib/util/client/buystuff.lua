@@ -70,7 +70,7 @@ local Textings = {
 }
 
 local Backgrounds = {
-	Color(),
+	Color(0, 0, 0),
 	Color(77, 202, 233),
 	Color(20, 246, 227),
 	Color(67, 216, 92),

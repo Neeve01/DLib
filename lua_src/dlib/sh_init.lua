@@ -89,7 +89,6 @@ MsgC('[DLib] Initializing DLib core ... ')
 DLib.simpleInclude('core/core.lua')
 DLib.simpleInclude('core/luaify.lua')
 DLib.simpleInclude('core/funclib.lua')
-DLib.simpleInclude('modules/color.lua')
 DLib.MessageMaker = DLib.simpleInclude('util/message.lua')
 DLib.MessageMaker(DLib, 'DLib')
 DLib.simpleInclude('core/sandbox.lua')
@@ -139,7 +138,6 @@ DLib.simpleInclude('extensions/entity.lua')
 DLib.simpleInclude('extensions/render.lua')
 DLib.simpleInclude('extensions/player.lua')
 
-DLib.Loader.shmodule('hook.lua')
 DLib.simpleInclude('luabridge/luaify2.lua')
 DLib.simpleInclude('luabridge/lobject.lua')
 
@@ -147,7 +145,6 @@ MsgC(string.format('%.2f ms\n', (SysTime() - timeStart) * 1000))
 timeStart = SysTime()
 MsgC('[DLib] Initializing DLib modules ... ')
 
-DLib.Loader.shmodule('luavector.lua')
 DLib.Loader.shmodule('net_ext.lua')
 DLib.Loader.shmodule('bytesbuffer.lua')
 DLib.Loader.shmodule('nbt.lua')
@@ -184,10 +181,6 @@ DLib.Loader.start('i18n')
 DLib.Loader.load('dlib/modules/i18n')
 DLib.Loader.finish()
 
-DLib.Loader.start('friends', true)
-DLib.Loader.load('dlib/modules/friendsystem')
-DLib.Loader.finish()
-
 if CLIENT then
 	DLib.VGUI = DLib.VGUI or {}
 end
@@ -197,10 +190,8 @@ timeStart = SysTime()
 MsgC('[DLib] Initializing DLib LuaBridge ... ')
 
 DLib.simpleInclude('luabridge/luabridge.lua')
-DLib.simpleInclude('luabridge/physgunhandler.lua')
 DLib.simpleInclude('luabridge/loading_stages.lua')
 DLib.simpleInclude('luabridge/savetable.lua')
-DLib.Loader.loadPureSHTop('dlib/modules/workarounds')
 
 DLib.hl2wdata = DLib.simpleInclude('data/hl2sweps.lua')
 

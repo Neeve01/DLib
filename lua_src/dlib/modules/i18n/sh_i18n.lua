@@ -25,7 +25,6 @@ local error = error
 local team = team
 local DLib = DLib
 local table = table
-local IsColor = IsColor
 
 i18n.hashed = i18n.hashed or {}
 i18n.hashedFunc = i18n.hashedFunc or {}

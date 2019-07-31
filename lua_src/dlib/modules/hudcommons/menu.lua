@@ -292,7 +292,7 @@ function PANEL:Think()
 end
 
 local DRAW_COLOR1 = Color(180, 180, 180)
-local DRAW_COLOR_TEXT = Color()
+local DRAW_COLOR_TEXT = Color(0, 0, 0)
 local DRAW_COLOR_TEXT_SHADOW = Color(40, 40, 40)
 local draw = draw
 local surface = surface

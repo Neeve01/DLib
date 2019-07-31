@@ -934,10 +934,10 @@ return function(tableTarget, moduleName, moduleColor)
 		tableTo.MessageError = PrintError
 		tableTo.LMessageError = LPrintError
 
-		tableTo.textcolor = Color(DEFAULT_TEXT_COLOR)
-		tableTo.textcolorWarn = Color(WARNING_COLOR)
-		tableTo.textcolorErr = Color(ERROR_COLOR)
-		tableTo.textcolorError = Color(ERROR_COLOR)
+		tableTo.textcolor = DEFAULT_TEXT_COLOR
+		tableTo.textcolorWarn = WARNING_COLOR
+		tableTo.textcolorErr = ERROR_COLOR
+		tableTo.textcolorError = ERROR_COLOR
 
 		tableTo.RepackMessage = RepackMessage
 		tableTo.FormatMessage = FormatMessage
